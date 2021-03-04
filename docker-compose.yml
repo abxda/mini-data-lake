@@ -1,0 +1,32 @@
+version: "3"
+#Mini Data Lake by @abxda
+services:
+  # Data Science
+  jupyter:
+    build: ./services/jupyter-spark/
+    container_name: "abxda-jupyter-all"
+    env_file:
+      - ./config/jupyter.env
+      - ./config/minio.env
+    restart: always
+    ports:
+      - 8888:8888
+    volumes:
+      - ./notebooks:/home/jovyan/work
+    entrypoint: sh -c 'start-notebook.sh --NotebookApp.token=$$JUPYTER_PASSWORD'
+    #Start in http://127.0.0.1:8888/lab?token=m1n1lake
+
+  # Model Storage
+  minio:
+    container_name: "minio"
+    restart: "always"
+    image: minio/minio
+    env_file:
+        - ./config/minio.env
+    volumes:
+        - minio_volume:/data
+    ports:
+        - 9000:9000
+    command: server /data 
+volumes:
+  minio_volume:    
