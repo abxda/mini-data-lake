@@ -1,3 +1,5 @@
+# docker-compose up --build -d
+# docker-compose up -d
 version: "3"
 #Mini Data Lake by @abxda
 services:
@@ -28,6 +30,85 @@ services:
     ports:
         - 9000:9000
     command: server /data 
+  
+  #Relational Database
+  # docker volume prune
+  # docker volume rm mini-data-lake_postgres_volume
+  # docker-compose rm
+  # La instrucción de arriba elimina todos los volumenes debe tenerse precaución al usarla
+  postgres:
+    #image: postgres
+    build: services/postgresql
+    restart: "always"
+    container_name: postgres
+    env_file: 
+      - ./config/postgres.env
+      - ./config/superset_database.env
+      - ./config/airflow_database.env
+      - ./config/shared_database.env
+    volumes:
+      - postgres_volume:/var/lib/postgresql/data/
+#      - ./services/postgresql/init/:/docker-entrypoint-initdb.d/  
+    ports:
+      - 5432:5432
+    restart: "always"
 
+  # Database explorer
+  pgadmin:
+    container_name: "pgadmin"
+    image: dpage/pgadmin4
+    env_file:
+      - ./config/pgadmin.env
+    volumes:
+        - pgadmin_volume:/root/.pgadmin
+    ports:
+      - 5050:80
+    restart: "always"
+
+ # API
+  fastapi:
+    container_name: "fastapi"
+    restart: "always"
+    build: services/fastapi
+    depends_on:
+        - postgres
+    env_file:
+      - ./config/minio.env
+    volumes:
+      - ./services/fastapi/app:/app
+      - ./services/fastapi/html:/html
+    ports:
+      - 80:80
+  # Visualization
+  superset:
+    build: ./services/superset/
+    container_name: "superset"
+    restart: "always"
+    depends_on:
+        - fastapi
+    env_file:
+        - ./config/superset_container.env
+        - ./config/superset_database.env
+    ports:
+      - 8088:8088
+  # Scheduling
+  airflow:
+    container_name: "airflow"
+    restart: "always"
+    build: services/airflow
+    depends_on:
+      - superset
+    env_file:
+      - ./config/airflow_container.env
+      - ./config/minio.env
+      - ./config/shared_database.env
+    volumes:
+      - ./services/airflow/dags/:/usr/local/airflow/dags
+      - ./notebooks:/usr/local/airflow/data
+    ports:
+      - 7777:8080
+    command: webserver
 volumes:
   minio_volume:    
+  postgres_volume:
+  pgadmin_volume:

@@ -1,0 +1,8 @@
+FROM tylerfowler/superset
+
+USER root
+
+RUN pip install --no-cache-dir \
+    pyhive \
+    psycopg2 \
+    elasticsearch-dbapi
