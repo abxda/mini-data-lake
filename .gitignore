@@ -1,5 +1,8 @@
 # Noticias
 news
+#MacOs
+.DS_Store
+
 # Editors
 .vscode/
 .idea/
