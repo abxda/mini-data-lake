@@ -27,6 +27,9 @@ RUN chmod -R 644 $SPARK_HOME/jars/hadoop-aws-3.2.0.jar
 ADD https://repo1.maven.org/maven2/org/apache/httpcomponents/httpclient/4.5.9/httpclient-4.5.9.jar $SPARK_HOME/jars
 RUN chmod -R 644 $SPARK_HOME/jars/httpclient-4.5.9.jar 
 
+ADD https://jdbc.postgresql.org/download/postgresql-42.2.19.jar $SPARK_HOME/jars
+RUN chmod -R 644 $SPARK_HOME/jars/postgresql-42.2.19.jar
+
 
 #Required for minIO service discovery by name.
 ADD /config/spark-defaults.conf /opt/spark/conf/

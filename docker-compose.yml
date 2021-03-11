@@ -10,6 +10,7 @@ services:
     env_file:
       - ./config/jupyter.env
       - ./config/minio.env
+      - ./config/postgres.env
     restart: always
     ports:
       - 8888:8888
