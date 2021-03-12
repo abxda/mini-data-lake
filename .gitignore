@@ -1,5 +1,5 @@
 # Noticias
-news
+news/*.json
 #MacOs
 .DS_Store
 
